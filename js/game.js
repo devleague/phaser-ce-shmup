@@ -7,6 +7,8 @@
   const PLAYER_BULLET_SPEED = 6;
   const ENEMY_SPAWN_FREQ = 100;
   const ENEMY_SPEED = 4.5;
+  const ENEMY_FIRE_FREQ = 30;
+  const ENEMY_BULLET_ACCEL = 100;
   const SQRT_TWO = Math.sqrt(2);
   const randomGenerator = new Phaser.RandomDataGenerator();
 
@@ -14,6 +16,7 @@
   let cursors;
   let playerBullets;
   let enemies;
+  let enemyBullets;
 
   const game = new Phaser.Game(GAME_WIDTH, GAME_HEIGHT, Phaser.AUTO, GAME_CONTAINER_ID, { preload, create, update });
 
@@ -23,6 +26,8 @@
   }
 
   function create() {
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
     cursors = game.input.keyboard.createCursorKeys();
     cursors.fire = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
     cursors.fire.onUp.add( handlePlayerFire );
@@ -31,6 +36,8 @@
     player.moveSpeed = INITIAL_MOVESPEED;
     playerBullets = game.add.group();
     enemies = game.add.group();
+    enemyBullets = game.add.group();
+    enemyBullets.enableBody = true;
   }
 
   function update() {
@@ -78,6 +85,9 @@
 
   function handleBulletAnimations() {
     playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
+    enemyBullets.children.forEach( bullet => {
+      game.physics.arcade.accelerateToObject(bullet, player, ENEMY_BULLET_ACCEL);
+    });
   }
 
   function randomlySpawnEnemy() {
@@ -89,6 +99,7 @@
 
   function handleEnemyActions() {
     enemies.children.forEach( enemy => enemy.y += ENEMY_SPEED );
+    enemies.children.forEach( enemy => randomEnemyFire(enemy));
   }
 
   function handlePlayerHit() {
@@ -121,11 +132,35 @@
 
       enemiesHit.forEach( destroyEnemy );
     }
+
+    // check if enemy bullets hit the player
+    let enemyBulletsLanded = enemyBullets.children
+      .filter( bullet => bullet.overlap(player));
+
+    if (enemyBulletsLanded.length) {
+      handlePlayerHit();
+      enemyBulletsLanded.forEach( removeBullet );
+    }
+  }
+
+  function randomEnemyFire(enemy) {
+    if (randomGenerator.between(0, ENEMY_FIRE_FREQ) === 0) {
+      let enemyBullet = game.add.sprite(enemy.x, enemy.y, GFX, 9);
+      enemyBullet.checkWorldBounds = true;
+      enemyBullet.outOfBoundsKill = true;
+      enemyBullets.add( enemyBullet );
+    }
   }
 
   function cleanup() {
     playerBullets.children
       .filter( bullet => bullet.y < -14 )
+      .forEach( bullet => bullet.destroy());
+    enemies.children
+      .filter( enemy => enemy.y > GAME_HEIGHT || !enemy.alive)
+      .forEach( enemy => enemy.destroy());
+    enemyBullets.children
+      .filter( bullet => !bullet.alive )
       .forEach( bullet => bullet.destroy());
   }
 
