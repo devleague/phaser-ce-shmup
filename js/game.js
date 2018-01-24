@@ -140,6 +140,9 @@
   function gameOver() {
     game.state.destroy();
     game.add.text(50, 186, `YOUR HEAD ASPLODE`, { fill: `#FFFFFF` });
+    let playAgain = game.add.text(120, 300, `Play Again`, { fill: `#FFFFFF` });
+    playAgain.inputEnabled = true;
+    playAgain.events.onInputUp.add(() => window.location.reload());
   }
 
 })(window.Phaser);
