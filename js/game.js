@@ -5,11 +5,15 @@
   const GFX = 'gfx';
   const INITIAL_MOVESPEED = 4;
   const PLAYER_BULLET_SPEED = 6;
+  const ENEMY_SPAWN_FREQ = 100;
+  const ENEMY_SPEED = 4.5;
   const SQRT_TWO = Math.sqrt(2);
+  const randomGenerator = new Phaser.RandomDataGenerator();
 
   let player;
   let cursors;
   let playerBullets;
+  let enemies;
 
   const game = new Phaser.Game(GAME_WIDTH, GAME_HEIGHT, Phaser.AUTO, GAME_CONTAINER_ID, { preload, create, update });
 
@@ -26,12 +30,14 @@
     player = game.add.sprite(186, 186, GFX, 8);
     player.moveSpeed = INITIAL_MOVESPEED;
     playerBullets = game.add.group();
-
+    enemies = game.add.group();
   }
 
   function update() {
     handlePlayerMovement();
     handleBulletAnimations();
+    randomlySpawnEnemy();
+    handleEnemyActions();
 
     cleanup();
   }
@@ -71,6 +77,17 @@
 
   function handleBulletAnimations() {
     playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
+  }
+
+  function randomlySpawnEnemy() {
+    if (randomGenerator.between(0, ENEMY_SPAWN_FREQ) === 0) {
+      let randomX = randomGenerator.between(0, GAME_WIDTH);
+      enemies.add( game.add.sprite(randomX, -24, GFX, 0));
+    }
+  }
+
+  function handleEnemyActions() {
+    enemies.children.forEach( enemy => enemy.y += ENEMY_SPEED );
   }
 
   function cleanup() {
