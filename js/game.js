@@ -91,6 +91,10 @@
     enemies.children.forEach( enemy => enemy.y += ENEMY_SPEED );
   }
 
+  function handlePlayerHit() {
+    gameOver();
+  }
+
   function handleCollisions() {
     //check if any bullets touch any enemies
     let enemiesHit = enemies.children
@@ -104,6 +108,16 @@
       playerBullets.children
         .filter( bullet => bullet.overlap(enemies))
         .forEach( removeBullet );
+
+      enemiesHit.forEach( destroyEnemy );
+    }
+
+    // check if enemies hit the player
+    enemiesHit = enemies.children
+      .filter( enemy => enemy.overlap(player));
+
+    if (enemiesHit.length) {
+      handlePlayerHit();
 
       enemiesHit.forEach( destroyEnemy );
     }
@@ -121,6 +135,11 @@
 
   function destroyEnemy(enemy) {
     enemy.kill();
+  }
+
+  function gameOver() {
+    game.state.destroy();
+    game.add.text(50, 186, `YOUR HEAD ASPLODE`, { fill: `#FFFFFF` });
   }
 
 })(window.Phaser);
