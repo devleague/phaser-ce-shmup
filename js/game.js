@@ -32,6 +32,8 @@
   function update() {
     handlePlayerMovement();
     handleBulletAnimations();
+
+    cleanup();
   }
 
   // Utility functions
@@ -69,6 +71,12 @@
 
   function handleBulletAnimations() {
     playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
+  }
+
+  function cleanup() {
+    playerBullets.children
+      .filter( bullet => bullet.y < -14 )
+      .forEach( bullet => bullet.destroy());
   }
 
 })(window.Phaser);
