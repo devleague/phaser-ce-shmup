@@ -4,6 +4,7 @@
   const GAME_CONTAINER_ID = 'game';
   const GFX = 'gfx';
   const INITIAL_MOVESPEED = 4;
+  const PLAYER_BULLET_SPEED = 6;
   const SQRT_TWO = Math.sqrt(2);
 
   let player;
@@ -30,6 +31,7 @@
 
   function update() {
     handlePlayerMovement();
+    handleBulletAnimations();
   }
 
   // Utility functions
@@ -63,6 +65,10 @@
 
   function handlePlayerFire() {
     playerBullets.add( game.add.sprite(player.x, player.y, GFX, 7));
+  }
+
+  function handleBulletAnimations() {
+    playerBullets.children.forEach( bullet => bullet.y -= PLAYER_BULLET_SPEED );
   }
 
 })(window.Phaser);
